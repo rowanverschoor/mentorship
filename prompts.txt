@@ -1,0 +1,48 @@
+Backend (run from /home/roversch/Desktop/mentor):
+dotnet new webapi -n WeatherApi -o backend/WeatherApi --no-openapi
+- --no-openapi skips Swagger, as agreed.
+- No --use-controllers flag needed — the default template already uses minimal APIs (routes mapped straight in Program.cs), so you won't get a separate Controller/Service file. That's the fewest-files version of the backend.
+
+Frontend (also from /home/roversch/Desktop/mentor):
+npx @angular/cli@19 new frontend --minimal --skip-tests --routing=false --style=css --skip-git
+- Pinned to @19 because your installed Node (v24.11.1) is just under what the newest Angular CLI requires (v24.15.0+) — v19 works fine with what you have.
+- --minimal strips out the testing framework setup entirely (this flag is literally meant for learning/small projects like this one).
+- --skip-tests removes the .spec.ts files on top of that.
+- --routing=false — no router needed for a single page.
+- --skip-git — skip it, since mentor/ is already its own git repo and you don't want a ne
+
+Run those two whenever you're ready. Once they're done, ping me and I'll point you at exactly n to wire up theactual /weather call — still no code written for you, just pointing at the spot.
+
+✻ Cooked for 1m 4s · done 14:22
+
+❯ im new to angulair, what did this all do
+
+  Searched for 1 pattern, read 2 files
+
+Here's what ng new generated, grouped by whether you'll ever actually
+touch it.
+
+Files you'll actually edit:
+- src/app/app.componeonly "page." InAngular, a component bundles together: the HTML (here it's inlined in the template string, since --minimal skipped generating a separate
+  .html file), the st now), and aTypeScript class holding data/logic (title = 'frontend' right now). This is where your zip code input, button, and results display will
+  go.
+- src/app/app.config.ts — app-wide setup/configuration. Right now it's basically empty, but this is where you'll register HttpClient later so app.component.ts is allowed to make HTTP calls to your backend.
+
+Files that exist but
+- src/main.ts — the actual entry point. It takes AppComponent and
+  "boots" it into thengular's equivalent of your backend's Program.cs — the thing that starts everything — except
+  you'll never need t
+- src/index.html — the single HTML page the whole app lives in (Angular is a single-page app: one real HTML file, everything else is JS
+  swapping content inapp-root> tag; that'sthe placeholder AppComponent gets injected into.
+- src/styles.css — global CSS, applies to the whole app rather than one
+  component.
+- package.json / package-lock.json — dependency list + lockfile, same role as a .csproj + lockfile on the C# side. npm install reads this to
+  pull down Angular's (not created yet —you run npm install inside frontend/ before ng serve will work).
+- angular.json — build/serve configuration (what ng serve and ng build actually do). You basically never hand-edit this for a project this size.
+- tsconfig*.json — Tyngular code isTypeScript, compiled down to JS in the browser.
+- .vscode/, .gitignorico — editor helpersand repo boilerplate, ignore entirely.
+
+What's notably absent, on purpose:
+- No .spec.ts test firamework config(--minimal), no router/routing module (--routing=false).
+
+So realistically: twots now, app.config.tsonce you add HttpClient), everything else is scaffolding. Next real step is npm install inside frontend/, then ng serve to confirm you get the default "Welcome to frontend!" page in the browser before touching any code.
