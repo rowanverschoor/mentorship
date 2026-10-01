@@ -1,6 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -8,27 +9,17 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapGet("/weather", async (double lat, double lon, HttpClient http, IConfiguration config) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var request = new HttpRequestMessage(
+        HttpMethod.Get,
+        $"https://api.api-ninjas.com/v1/weather?lat={lat}&lon={lon}");
+    request.Headers.Add("X-Api-Key", config["ApiNinjas:Key"]);
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    var response = await http.SendAsync(request);
+    var body = await response.Content.ReadAsStringAsync();
+
+    return Results.Content(body, "application/json", statusCode: (int)response.StatusCode);
 });
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
