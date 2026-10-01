@@ -1,0 +1,2 @@
+amsterdam
+curl "http://localhost:5297/weather?lat=34.09&lon=-118.41"
