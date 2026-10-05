@@ -1,32 +1,46 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { Weather } from './models/weather';
+import { WeatherService } from './services/weather.service';
 
 @Component({
   selector: 'app-root',
   imports: [FormsModule],
   template: `
-    <input type="number" [(ngModel)]="latitude" placeholder="lat" />
-    <input type="number" [(ngModel)]="longitude" placeholder="lon" />
-    <button (click)="getWeather()">Get weather</button>
-    <pre>{{ result }}</pre>
+    <h1>Weather</h1>
+
+    <input type="number" [(ngModel)]="latitude" placeholder="Latitude" />
+    <input type="number" [(ngModel)]="longitude" placeholder="Longitude" />
+    <button (click)="load()">Get weather</button>
+
+    @if (error) {
+      <p>{{ error }}</p>
+    }
+
+    @if (weather) {
+      <ul>
+        <li>Temperature: {{ weather.temperature }}°C</li>
+        <li>Feels like: {{ weather.feelsLike }}°C</li>
+        <li>Humidity: {{ weather.humidity }}%</li>
+        <li>Wind: {{ weather.windSpeed }} m/s</li>
+        <li>Clouds: {{ weather.cloudPercentage }}%</li>
+      </ul>
+    }
   `,
 })
 export class AppComponent {
+  private weatherService = inject(WeatherService);
+
   latitude = 52.37;
   longitude = 4.89;
-  result = '';
+  weather: Weather | null = null;
+  error = '';
 
-  private http = inject(HttpClient);
-
-  getWeather() {
-    this.http
-      .get('http://localhost:5297/weather', {
-        params: { lat: this.latitude, lon: this.longitude },
-      })
-      .subscribe({
-        next: (data) => (this.result = JSON.stringify(data, null, 2)),
-        error: (err) => (this.result = 'Error: ' + err.message),
-      });
+  load() {
+    this.error = '';
+    this.weatherService.get(this.latitude, this.longitude).subscribe({
+      next: (weather) => (this.weather = weather),
+      error: () => (this.error = 'Could not load weather'),
+    });
   }
 }
