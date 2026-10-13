@@ -1,0 +1,9 @@
+<h1>Weather</h1>
+
+<app-location-form (submitted)="store.load($event.latitude, $event.longitude)" />
+
+<app-status-message [loading]="store.loading()" [error]="store.error()" />
+
+@if (store.weather(); as weather) {
+  <app-weather-details [weather]="weather" />
+}
