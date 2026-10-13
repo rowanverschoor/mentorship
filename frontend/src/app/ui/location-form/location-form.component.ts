@@ -1,10 +1,6 @@
 import { Component, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-export interface Location {
-  latitude: number;
-  longitude: number;
-}
+import { Location } from '../../models/location';
 
 // Collects coordinates and reports them. Doesn't know what happens next.
 @Component({

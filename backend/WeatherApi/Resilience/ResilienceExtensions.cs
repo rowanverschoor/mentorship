@@ -14,8 +14,9 @@ public static class ResilienceExtensions
     public static IHttpResiliencePipelineBuilder AddWeatherResilience(this IHttpClientBuilder builder) =>
         builder.AddResilienceHandler("weather", pipeline =>
         {
-            // Give up on the whole operation (all retries included) after 20s.
-            pipeline.AddTimeout(TimeSpan.FromSeconds(20));
+            // Give up on the whole operation (all retries included) after 30s.
+            // Worst case: 4 attempts x 5s + waits of ~3.5s (+ jitter) = ~24s.
+            pipeline.AddTimeout(TimeSpan.FromSeconds(30));
 
             // Retry limit: at most 3 extra attempts, waiting 0.5s, 1s, 2s (+ jitter).
             pipeline.AddRetry(new HttpRetryStrategyOptions

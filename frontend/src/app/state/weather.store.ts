@@ -1,13 +1,9 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Subject, catchError, map, of, startWith, switchMap } from 'rxjs';
+import { Location } from '../models/location';
 import { Weather } from '../models/weather';
 import { WeatherApi } from '../core/weather-api';
-
-interface Location {
-  latitude: number;
-  longitude: number;
-}
 
 interface WeatherState {
   weather: Weather | null;

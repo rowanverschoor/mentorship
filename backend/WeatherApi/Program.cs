@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
 using WeatherApi.Resilience;
@@ -14,15 +15,18 @@ builder.Services.AddHttpClient<IWeatherService, ApiNinjasWeatherService>(client 
 
 builder.Services.AddWeatherRateLimiting();
 
-builder.Services.AddCors(options =>
-    options.AddDefaultPolicy(policy =>
-        policy.WithOrigins(builder.Configuration["Cors:AllowedOrigin"]!)
-              .AllowAnyHeader()
-              .AllowAnyMethod()));
+// Behind nginx every request comes from nginx's IP; trust X-Forwarded-For so the
+// rate limiter sees the real client. Safe because only nginx can reach this API.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 var app = builder.Build();
 
-app.UseCors();
+app.UseForwardedHeaders();
 app.UseRateLimiter();
 
 app.MapGet("/weather", async (double lat, double lon, IWeatherService weather) =>

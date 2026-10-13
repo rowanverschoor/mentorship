@@ -1,1 +1,22 @@
-/* You can add global styles to this file, and also import other style files */
+/* Colors live here as variables so every component can use them. */
+:root {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --error: crimson;
+  color-scheme: light;
+}
+
+/* Follows the operating system's dark mode setting. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --text: #e8e8e8;
+    --error: #ff6b6b;
+    color-scheme: dark; /* also darkens native inputs and buttons */
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}

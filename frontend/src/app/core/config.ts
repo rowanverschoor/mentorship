@@ -1,2 +1,3 @@
-// Base URL of the backend API. Change it here only.
-export const API_URL = 'http://localhost:5149';
+// Base URL of the backend API, relative to the page.
+// nginx (docker) and the ng serve proxy (proxy.conf.json) both forward /api to the backend.
+export const API_URL = '/api';
