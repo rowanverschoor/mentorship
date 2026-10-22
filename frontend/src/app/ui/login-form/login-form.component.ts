@@ -5,14 +5,8 @@ import { Auth } from '../../core/auth';
 @Component({
   selector: 'app-login-form',
   imports: [FormsModule],
-  template: `
-    <form (ngSubmit)="submit()">
-      <input name="username" [(ngModel)]="username" placeholder="Username" required />
-      <input name="password" [(ngModel)]="password" type="password" placeholder="Password" required />
-      <button>Log in</button>
-      @if (error()) { <p>{{ error() }}</p> }
-    </form>
-  `,
+  templateUrl: './login-form.component.html',
+  styleUrl: './login-form.component.css',
 })
 export class LoginFormComponent {
   private auth = inject(Auth);
