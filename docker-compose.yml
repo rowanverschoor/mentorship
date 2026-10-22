@@ -4,6 +4,9 @@ services:
     # No published port: only nginx can reach the API, through /api.
     environment:
       ApiNinjas__Key: ${API_NINJAS_KEY:?Set API_NINJAS_KEY in .env}
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in .env}
+      Auth__User: ${AUTH_USER:?Set AUTH_USER in .env}
+      Auth__Password: ${AUTH_PASSWORD:?Set AUTH_PASSWORD in .env}
 
   frontend:
     build: ./frontend

@@ -1,1 +1,6 @@
-<app-weather-page />
+@if (auth.loggedIn()) {
+  <button (click)="auth.logout()">Log out</button>
+  <app-weather-page />
+} @else {
+  <app-login-form />
+}

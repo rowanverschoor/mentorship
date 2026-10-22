@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
+using WeatherApi.Auth;
 using WeatherApi.Resilience;
 using WeatherApi.Services;
 
@@ -24,9 +25,13 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
+builder.Services.AddJwtAuth(builder.Configuration);
+
 var app = builder.Build();
 
 app.UseForwardedHeaders();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseRateLimiter();
 
 app.MapGet("/weather", async (double lat, double lon, IWeatherService weather) =>
@@ -48,6 +53,8 @@ app.MapGet("/weather", async (double lat, double lon, IWeatherService weather) =
         // Retries are used up and the provider still failed.
         return Results.Problem("Weather provider failed.", statusCode: 502);
     }
-}).RequireRateLimiting(RateLimitExtensions.PolicyName);
+}).RequireAuthorization().RequireRateLimiting(RateLimitExtensions.PolicyName);
+
+app.MapLogin();
 
 app.Run();
