@@ -20,7 +20,8 @@ public class JwtTokenService(IOptions<JwtOptions> options) : ITokenService
         var token = new JwtSecurityToken(
             issuer: _jwt.Issuer,
             audience: _jwt.Audience,
-            claims: [new Claim(ClaimTypes.Name, username)],
+            // Name is for our endpoints, NameIdentifier is how SignalR's Clients.User() finds the user.
+            claims: [new Claim(ClaimTypes.Name, username), new Claim(ClaimTypes.NameIdentifier, username)],
             expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: new SigningCredentials(_jwt.SigningKey, SecurityAlgorithms.HmacSha256));
 

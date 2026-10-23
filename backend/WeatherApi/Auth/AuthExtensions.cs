@@ -18,7 +18,19 @@ public static class AuthExtensions
         services.AddSingleton<IUserValidator, ConfiguredUserValidator>();
 
         // Validates the bearer token on every request: signature, issuer, audience, expiry.
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(bearer =>
+            bearer.Events = new JwtBearerEvents
+            {
+                // Browsers cannot set headers on a WebSocket, so the SignalR client sends
+                // the token in the query string. Only accept it there for the hub.
+                OnMessageReceived = ctx =>
+                {
+                    var token = ctx.Request.Query["access_token"];
+                    if (!string.IsNullOrEmpty(token) && ctx.Request.Path.StartsWithSegments("/hubs"))
+                        ctx.Token = token;
+                    return Task.CompletedTask;
+                },
+            });
         services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
             .Configure<IOptions<JwtOptions>>((bearer, jwt) => bearer.TokenValidationParameters = new()
             {

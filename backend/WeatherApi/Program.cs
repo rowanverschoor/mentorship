@@ -1,10 +1,10 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.HttpOverrides;
 using WeatherApi.Auth;
+using WeatherApi.Queue;
+using WeatherApi.Realtime;
 using WeatherApi.Resilience;
 using WeatherApi.Services;
-using System.Security.Claims;
-using WeatherApi.Queue;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,10 +27,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 builder.Services.AddJwtAuth(builder.Configuration);
-builder.Services.AddSingleton<IWeatherQueue, ChannelWeatherQueue>();
-builder.Services.AddSingleton<WeatherResults>();
-builder.Services.AddHostedService<WeatherWorker>();
 
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IWeatherNotifier, SignalRWeatherNotifier>();
+builder.Services.AddSingleton<IWeatherQueue, ChannelWeatherQueue>();
+builder.Services.AddHostedService<WeatherWorker>();
 
 var app = builder.Build();
 
@@ -39,29 +40,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 
-app.MapPost("/weather", (double lat, double lon, ClaimsPrincipal user, IWeatherQueue queue, WeatherResults results) =>
+app.MapPost("/weather", (double lat, double lon, ClaimsPrincipal user, IWeatherQueue queue) =>
 {
     if (lat is < -90 or > 90 || lon is < -180 or > 180)
         return Results.BadRequest("Latitude must be -90..90 and longitude -180..180.");
 
     var job = new WeatherJob(Guid.NewGuid(), user.Identity!.Name!, lat, lon);
 
-    // Mark as pending before enqueueing, so a fast worker can never be overwritten by "pending".
-    results.Set(job.Id, new JobResult(job.User));
-    if (queue.TryEnqueue(job))
-        return Results.Accepted($"/weather/{job.Id}", new { id = job.Id });
-
-    results.Remove(job.Id);
-    return Results.Problem("Too many queued requests, try again later.", statusCode: 503);
+    // The result comes later, through the hub. The id lets the browser match it to this request.
+    return queue.TryEnqueue(job)
+        ? Results.Accepted(value: new { id = job.Id })
+        : Results.Problem("Too many queued requests, try again later.", statusCode: 503);
 }).RequireAuthorization().RequireRateLimiting(RateLimitExtensions.PolicyName);
 
-// Only the user who queued the job can read it.
-app.MapGet("/weather/{id:guid}", (Guid id, ClaimsPrincipal user, WeatherResults results) =>
-    results.Get(id) is { } r && r.User == user.Identity!.Name
-        ? Results.Ok(new { done = r.Done, weather = r.Weather, error = r.Error })
-        : Results.NotFound()).RequireAuthorization();
-
-
+app.MapHub<WeatherHub>("/hubs/weather");
 app.MapLogin();
 
 app.Run();
