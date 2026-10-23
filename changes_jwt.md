@@ -11,8 +11,8 @@ Built the same way as the rest of the project: each concern has a small contract
 | File | Responsibility |
 |---|---|
 | `AuthOptions.cs` | Typed config: `JwtOptions` (Issuer, Audience, Key; validated at startup, so a missing or short key stops the app instead of failing on the first request) and `AuthOptions` (the single login user). |
-| `ITokenService.cs` / `JwtTokenService.cs` | Contract and implementation for issuing a token. |
-| `IUserValidator.cs` / `ConfiguredUserValidator.cs` | Contract and implementation for checking credentials. Uses the single user from config (`Auth:User`, `Auth:Password`) with a fixed-time comparison. Swap for a database or identity provider without touching the endpoint. |
+| `TokenService.cs` | `ITokenService` contract and its `JwtTokenService` implementation for issuing a token. |
+| `UserValidator.cs` | `IUserValidator` contract and its `ConfiguredUserValidator` implementation for checking credentials. Uses the single user from config (`Auth:User`, `Auth:Password`) with a fixed-time comparison. Swap for a database or identity provider without touching the endpoint. |
 | `AuthExtensions.cs` | Wiring only: `AddJwtAuth()` registers options, services and bearer validation (signature, issuer, audience, expiry); `MapLogin()` is the `/login` endpoint. Also holds the small `LoginRequest` record. |
 
 Other backend changes:
