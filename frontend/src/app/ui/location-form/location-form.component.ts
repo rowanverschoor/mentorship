@@ -1,4 +1,4 @@
-import { Component, output } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Location } from '../../models/location';
 
@@ -7,6 +7,7 @@ import { Location } from '../../models/location';
   selector: 'app-location-form',
   imports: [FormsModule],
   templateUrl: './location-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './location-form.component.css',
 })
 export class LocationFormComponent {

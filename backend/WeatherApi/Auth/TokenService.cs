@@ -5,6 +5,12 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace WeatherApi.Auth;
 
+// Contract for issuing a token. The login endpoint depends on this, not on JWT details.
+public interface ITokenService
+{
+    string Create(string username);
+}
+
 public class JwtTokenService(IOptions<JwtOptions> options) : ITokenService
 {
     private readonly JwtOptions _jwt = options.Value;
